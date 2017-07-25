@@ -14,13 +14,18 @@ node {
         stage 'Tag and publish release image'
         sh "make tag latest \$(git rev-parse --short HEAD) \$(git tag --points-at HEAD)"
         sh "make buildtag master \$(git tag --points-at HEAD)"
-        withEnv(["DOCKER_USER=${DOCKER_USER}",
-                 "DOCKER_PASSWORD=${DOCKER_PASSWORD}"]) {    
+        withDockerRegistry([credentialsId: 'docker_hub_credentials', url: 'https://hub.docker.com/']) {
             sh "make login"
         }
+
+        /* withEnv(["DOCKER_USER=${DOCKER_USER}",
+                 "DOCKER_PASSWORD=${DOCKER_PASSWORD}"]) {    
+            sh "make login"
+        }*/
+        
         sh "make publish"
 
-        stage 'Deploy release'
+ /*       stage 'Deploy release'
         sh "printf \$(git rev-parse --short HEAD) > tag.tmp"
         def imageTag = readFile 'tag.tmp'
         build job: DEPLOY_JOB, parameters: [[
@@ -28,6 +33,7 @@ node {
             name: 'IMAGE_TAG',
             value: 'rohankarthik/todobackend:' + imageTag
         ]]
+ */       
     }
     finally {
         stage 'Collect test reports'
